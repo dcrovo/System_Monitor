@@ -44,5 +44,15 @@ int main() {
     }
   }
 
-  std::cout<<((free_memory / (total_memory - buffers)));
+  //std::cout<<((free_memory / (total_memory - buffers)));
+
+  std::ifstream file("/proc/uptime");
+  string uptime, idletime, linet;
+  if (file.is_open()) {
+    std::getline(file, linet);
+    std::istringstream linestream(linet);
+    linestream >> uptime >> idletime;
+  }
+
+  std::cout<<stol(uptime)<<"\n"<<idletime;
 }
