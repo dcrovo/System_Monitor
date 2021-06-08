@@ -68,7 +68,7 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
+// DONE-TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() {
   std::ifstream filestream(kProcDirectory + kMeminfoFilename);
   string line;
@@ -100,7 +100,7 @@ float LinuxParser::MemoryUtilization() {
   return 1.0 - (free_memory / (total_memory - buffers));
 }
 
-// TODO: Read and return the system uptime
+// DONE-TODO: Read and return the system uptime
 long LinuxParser::UpTime() {
   std::ifstream file(kProcDirectory + kUptimeFilename);
   string uptime, idletime, line;
@@ -114,21 +114,38 @@ long LinuxParser::UpTime() {
   return stol(uptime);
 }
 
-// TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+// DONE- TODO: Read and return the number of jiffies for the system
+long LinuxParser::Jiffies() {   return UpTime()*sysconf(_SC_CLK_TCK); }
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
 // TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() { 
+  
+  return 0; }
 
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<string> LinuxParser::CpuUtilization() {
+  vector<string> output;
+  std::ifstream file(kProcDirectory + kStatFilename);
+  string line, value;
+  if (file.is_open()) {
+    std::getline(file, line);
+    std::istringstream linestream(line);
+    while(linestream >> value){
+      if(value != "cpu" ){
+        output.push_back(value);
+      }
+    }
+        
+  }
+  return output;
+}
 
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {

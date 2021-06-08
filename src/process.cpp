@@ -1,12 +1,12 @@
 #include "process.h"
 
+#include <linux_parser.h>
 #include <unistd.h>
 
 #include <cctype>
 #include <sstream>
 #include <string>
 #include <vector>
-
 using std::string;
 using std::to_string;
 using std::vector;
@@ -15,7 +15,9 @@ using std::vector;
 int Process::Pid() { return 0; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+float Process::CpuUtilization(){
+ return 0;
+}
 
 // TODO: Return the command that generated this process
 string Process::Command() { return string(); }
