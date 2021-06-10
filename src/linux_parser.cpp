@@ -1,6 +1,7 @@
 #include "linux_parser.h"
 
 #include <dirent.h>
+#include <process.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -100,7 +101,7 @@ float LinuxParser::MemoryUtilization() {
   return 1.0 - (free_memory / (total_memory - buffers));
 }
 
-// DONE DC: Read and return the system uptime
+// DONE: Read and return the system uptime
 long LinuxParser::UpTime() {
   std::ifstream file(kProcDirectory + kUptimeFilename);
   string uptime, idletime, line;
@@ -114,7 +115,7 @@ long LinuxParser::UpTime() {
   return stol(uptime);
 }
 
-// DONE DC: Read and return the number of jiffies for the system
+// DONE: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return UpTime() * sysconf(_SC_CLK_TCK); }
 
 // TODO: Read and return the number of active jiffies for a PID
@@ -127,7 +128,7 @@ long LinuxParser::ActiveJiffies() { return 0; }
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() { return 0; }
 
-// DONE DC: Read and return CPU utilization
+// DONE : Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() {
   vector<string> output;
   std::ifstream file(kProcDirectory + kStatFilename);
@@ -164,7 +165,7 @@ int LinuxParser::TotalProcesses() {
   return total_processes;
 }
 
-// DONE-TODO: Read and return the number of running processes
+// DONE: Read and return the number of running processes
 int LinuxParser::RunningProcesses() {
   std::ifstream file(kProcDirectory + kStatFilename);
   string line, key, value;
@@ -184,32 +185,50 @@ int LinuxParser::RunningProcesses() {
   return procs_running;
 }
 
-// DONE-TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization(int pid) {
+// DONE: Read and return CPU utilization
+
+float LinuxParser::CpuUtilization(int  pid) {
+
+
   std::ifstream file(kProcDirectory + to_string(pid) + kStatFilename);
   string line, value;
-  vector<string> values;
+  vector<string> cpu_info;
   if (file.is_open()) {
     std::getline(file, line);
     std::istringstream linestream(line);
 
     for (int i = 0; i < 22; i++) {
       linestream >> value;
-      values.push_back(value);
+      cpu_info.push_back(value);
     }
   }
-  return values;
+  float uptime = LinuxParser::UpTime();
+  float utime = stol(cpu_info[13]);
+  float stime = stol(cpu_info[14]);
+  float cutime = stol(cpu_info[15]);
+  float cstime = stol(cpu_info[16]);
+  float starttime = UpTime(pid);
+  float freq = sysconf(_SC_CLK_TCK);
+  float total = utime + stime + cutime + cstime;
+  float seconds = uptime - (starttime / freq);
+  float cpu_utilization;
+  // Calculation acording to stackoverflow question
+  // provided by Udacity
+
+    cpu_utilization = ((total / freq) / seconds);
+ 
+  return cpu_utilization;
 }
 
-// TODO: Read and return the command associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid) { 
+// DONE: Read and return the command associated with a process
+string LinuxParser::Command(int pid) {
   std::ifstream file(kProcDirectory + to_string(pid) + kCmdlineFilename);
   string line;
-  if(file.is_open()){
+  if (file.is_open()) {
     getline(file, line);
   }
-  return line; }
+  return line;
+}
 
 // DONE - DC: Read and return the memory used by a process
 string LinuxParser::Ram(int pid) {
@@ -274,7 +293,18 @@ string LinuxParser::User(int pid) {
 
 // DONE: Read and return the uptime of a process
 long LinuxParser::UpTime(int pid) {
-  vector<string> process_inf = CpuUtilization(pid);
+  std::ifstream file(kProcDirectory + to_string(pid) + kStatFilename);
+  string line, value;
+  vector<string> process_inf;
+  if (file.is_open()) {
+    std::getline(file, line);
+    std::istringstream linestream(line);
+
+    for (int i = 0; i < 22; i++) {
+      linestream >> value;
+      process_inf.push_back(value);
+    }
+  }
   long uptime = stol(process_inf[21]);
   return uptime;
 }
