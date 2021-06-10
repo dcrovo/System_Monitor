@@ -1,5 +1,6 @@
 monitor
 a.out
+testing.cpp
 settings.json
 *.o
 build/*

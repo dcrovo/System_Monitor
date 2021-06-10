@@ -4,11 +4,29 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 using std::string;
 using std::vector;
 using std::stol;
+using std::to_string;
+
+string Uid(int pid) {
+  std::ifstream file("/proc/" + to_string(pid) + "/status");
+  string key, line, Uid;
+  if (file.is_open()) {
+    while (std::getline(file, line)) {
+      std::istringstream linestream(line);
+      while (linestream >> key) {
+        if (key == "Uid:") {
+          linestream >> Uid;
+        }
+      }
+    }
+  }
+  return Uid;
+}
 vector<string> CpuUtilization() {
   vector<string> output;
   std::ifstream file("/proc/stat");
@@ -25,6 +43,7 @@ vector<string> CpuUtilization() {
   file.close();
   return output;
 }
+
 
 
 float CpuUtilizationP() {
@@ -120,4 +139,7 @@ int main() {
             << " : " <<cpu[4] << " : "<< cpu[5] << " : "<< cpu[6] << " : "<< cpu[7]
             << " : " <<cpu[8] << " : "<< cpu[9] << " : ";
   float cpu_ = CpuUtilizationP();
+  std::cout<<"\n"<<Uid(2304);
+
+  std::cout<<"\n"<<sysconf(_SC_CLK_TCK)<<"\n";
 }
